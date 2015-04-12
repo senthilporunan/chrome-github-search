@@ -93,12 +93,11 @@ GitHubSearch.prototype.saveChanges = function() {
     }
   
 	var saveTemplate = prompt('Save Search template : ', searchText);
-	
-	var jsonObj = {};
-	jsonObj[saveTemplate] = searchText;
-    chrome.storage.sync.set(jsonObj, function() {
-        
-    });
+	if (saveTemplate) {
+		var jsonObj = {};
+		jsonObj[saveTemplate] = searchText;
+		chrome.storage.sync.set(jsonObj);
+	}
 }
 
 /**

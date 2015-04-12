@@ -2,16 +2,17 @@
   "manifest_version": 2,
 
   "name": "Github Search",
-  "description": "This extension adds more functionality to Github search page",
+  "description": "This extension adds more functionality and simplifies Github search page",
   "version": "0.1",
   "background": {"page": "background.html"},
   "page_action": {
-    "name": "github search",
-    "default_icon": "icon.png"
+    "name": "github_search",
+    "default_icon": "img/icon.png"
   },
   "permissions": [ "https://github.com/*", "storage" ],
    "content_scripts": [{
-        "matches": ["<all_urls>","https://github.com/*","https://www.github.com/search/*","https://github.com/search/*"],
-        "js": ["jquery-1.11.2.js","content.js"]
+        "matches": ["https://www.github.com/search*","https://github.com/search*","https://github.paypal.com/search*",
+		"https://github.corp.ebay.com/search*"],
+        "js": ["js/jquery-1.11.2.js","js/content.js"]
     }]
 }

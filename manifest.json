@@ -5,7 +5,7 @@
   "description": "This extension adds more functionality to Github search page",
   "version": "0.1",
   "background": {"page": "background.html"},
-  "browser_action": {
+  "page_action": {
     "name": "github search",
     "default_icon": "icon.png"
   },

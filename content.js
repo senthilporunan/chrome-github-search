@@ -191,7 +191,6 @@ GitHubSearch.prototype.showSearchBox = function() {
 	var searchQueryBox = $(".flex-table-item-primary");
 
 	$('.js-search-query').keypress(function(e) {
-		$(".js-search-query").attr('name','');
 		searchQueryBox.find('.toolitup-option-values').remove();
 		console.log('KeyPress');
 		var searchingValue = $(".js-search-query").val();

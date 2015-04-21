@@ -107,7 +107,6 @@ GitHubSearch.prototype.saveChanges = function() {
 var formLinks = function(searchText, searchProperty) {
 	var returnValue="";
 	returnValue += searchProperty.replace(/:/g,'%3A').replace(/ /g,'+');
-	console.log("R2: "+returnValue);
 	return returnValue;
 }
 
@@ -126,8 +125,7 @@ GitHubSearch.prototype.showSavedTemplate = function() {
 		for (var idx in allKeys) {
 			var key = allKeys[idx];
 			var value = items[key];
-			console.log("Key: "+key+" Value: "+value); 
-			codeSearchNav.append("<a class=\"menu-item\" href=\""+window.location.origin+"/search?q="+formLinks(key, value)+"&utf8=%E2%9C%93&type="+init().getPreDefinedType()+"&ref=searchresults\"><span class=\"octicon octicon-search\"></span>  "+key+"<span class=\"octicon octicon-x\" class=\"toolitup-cross-id\"style=\"float:right;\"></span></a>");
+			codeSearchNav.append("<a class=\"menu-item toolitup-saved-list\" href=\""+window.location.origin+"/search?q="+formLinks(key, value)+"&utf8=%E2%9C%93&type="+init().getPreDefinedType()+"&ref=searchresults\"><span class=\"octicon octicon-search\"></span>  "+key+"<span class=\"octicon octicon-x\" class=\"toolitup-cross-id\" style=\"float:right;\"></span></a>");
 		}
 		codeSearchDiv.append("</nav>");
 	});
@@ -135,26 +133,40 @@ GitHubSearch.prototype.showSavedTemplate = function() {
 
 /**
   * If user clicks cross button it will call
-  * Not working have to check this one
+  * 
 **/
 var removeElement = function() {
-console.log('Before click cross box');
-	$('.toolitup-cross-id').click(function() {
-		console.log('Inside click cross box');
-		chrome.storage.sync.get(null, function(items) {
-			var allKeys = Object.keys(items);
-			for (var idx in allKeys) {
-				var key = allKeys[idx];
-				var value = items[key];
-				if (key === 'jrate') {
-					chrome.storage.sync.remove(key,function() {
-						alert("item removed");
-					});
+	$('body').on('click','.toolitup-saved-list',function(e) {
+		e.stopPropagation();
+		if (e.target.className.indexOf("octicon-x") > 0) {
+			var removeKey = e.currentTarget.textContent.trim();		
+			chrome.storage.sync.get(null, function(items) {
+				var allKeys = Object.keys(items);
+				for (var idx in allKeys) {
+					var key = allKeys[idx];
+					var value = items[key];
+					if (key.trim() === removeKey.trim()) {
+						console.log("Item Removed: "+removeKey);
+						chrome.storage.sync.remove(key);
+					}
 				}
-			}
-		});
+			}); 
+		}
 	});
-}
+};
+
+
+/**
+  * If user selected value in the list, it will add to the search string
+  * 
+**/
+var addElementInSearchText = function() {
+	$(".toolitup-option-values > p").on('click',function() {
+		var newValue = $(".js-search-query").val() + ' ' + this.innerText.split(' :',1) + ':';
+		$(".js-search-query").val(newValue);
+		$(".flex-table-item-primary").find('.toolitup-option-values').remove();
+	});
+};
 
 /**
   * Will help to add option div after text box
@@ -171,30 +183,27 @@ var formSearchString = function(event, searchingValue) {
 		if (searchingValue.indexOf(key+':') === -1)
 			returnString +=  "<p style=\"cursor:pointer;font-weight:600;z-index:98; \"> "+key+" :<span style=\"font-style:italic;padding-left:"+(110-key.length*8)+"px; \">"+value[0]+"</span></p>";
 	}
+	returnString +=  "<p>NOT    e.g: skip few directories</p>";
 	returnString +=  "<p>/***  - will work in opposite manner  ***/</p>";
 	return returnString;
 };
 
 var hideSearchPopupBox = function() {
-	console.log('Inside hideSearchPopupBox');
 	var searchQueryBox = $(".flex-table-item-primary");
 	
-	$('.js-search-query').focusout(function() {
-		console.log('Focus out');
+	$('.flex-table-item').on('mouseleave', function() {
 		searchQueryBox.find('.toolitup-option-values').remove();
 	});
 }
 
 GitHubSearch.prototype.showSearchBox = function() {
-	console.log('Inside showSearchBox');
 	var searchQueryBox = $(".flex-table-item-primary");
 
-	$('.js-search-query').keypress(function(e) {
+	$('.js-search-query').on('mouseenter', function(e) {
 		searchQueryBox.find('.toolitup-option-values').remove();
-		console.log('KeyPress');
 		var searchingValue = $(".js-search-query").val();
 		searchQueryBox.append("<div style=\"background-color:yellow;width:75%;z-index:98;position: absolute;\" class=\"toolitup-option-values\">"+formSearchString(e, searchingValue)+"</div>");
-		
+		addElementInSearchText();
 	});
 	hideSearchPopupBox();
 }
@@ -209,9 +218,9 @@ function object(obj) {
     return new F();
 }
 
-$(document).ready(function() {  
+$(function() {  
 
-	//chrome.storage.sync.clear();  //Temporary for testing
+	console.log("Starting..");
     var gitHub = new GitHubSearch();
     gitHub.addSaveMacro();
     
@@ -221,7 +230,6 @@ $(document).ready(function() {
 
 	gitHub.showSearchBox();
 	removeElement();
-    console.log("Last Line");
     
 });
 
